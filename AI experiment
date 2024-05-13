@@ -1,0 +1,98 @@
+pip install torch torchvision transformers
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import transforms
+from transformers import CLIPTextModel, CLIPTokenizer
+
+# Define the Generator and Discriminator
+class Generator(nn.Module):
+    def __init__(self):
+        super(Generator, self).__init__()
+        self.fc = nn.Linear(512, 256*256*3)
+        self.tanh = nn.Tanh()
+
+    def forward(self, text_features):
+        x = self.fc(text_features)
+        x = x.view(-1, 3, 256, 256)
+        x = self.tanh(x)
+        return x
+
+class Discriminator(nn.Module):
+    def __init__(self):
+        super(Discriminator, self).__init__()
+        self.conv = nn.Conv2d(3, 64, 4, stride=2, padding=1)
+        self.fc = nn.Linear(64*128*128, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, images):
+        x = self.conv(images)
+        x = x.view(-1, 64*128*128)
+        x = self.fc(x)
+        x = self.sigmoid(x)
+        return x
+
+# Load CLIP model and tokenizer
+tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-base-patch32")
+text_model = CLIPTextModel.from_pretrained("openai/clip-vit-base-patch32")
+
+# Instantiate models
+G = Generator()
+D = Discriminator()
+
+# Optimizers
+g_optimizer = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
+d_optimizer = optim.Adam(D.parameters(), lr=0.0002, betas=(0.5, 0.999))
+
+# Loss function
+criterion = nn.BCELoss()
+
+# Training loop (simplified)
+def train(text_descriptions, image_data, epochs=10000):
+    for epoch in range(epochs):
+        for text, real_images in zip(text_descriptions, image_data):
+            real_images = real_images.to(device)
+            text = text.to(device)
+
+            # Prepare real and fake labels
+            real_labels = torch.ones(real_images.size(0), 1).to(device)
+            fake_labels = torch.zeros(real_images.size(0), 1).to(device)
+
+            # Get text features
+            inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(device)
+            text_features = text_model(**inputs).last_hidden_state.mean(dim=1)
+
+            # Train Discriminator
+            D.zero_grad()
+            real_outputs = D(real_images)
+            d_real_loss = criterion(real_outputs, real_labels)
+
+            fake_images = G(text_features)
+            fake_outputs = D(fake_images.detach())
+            d_fake_loss = criterion(fake_outputs, fake_labels)
+
+            d_loss = d_real_loss + d_fake_loss
+            d_loss.backward()
+            d_optimizer.step()
+
+            # Train Generator
+            G.zero_grad()
+            fake_outputs = D(fake_images)
+            g_loss = criterion(fake_outputs, real_labels)
+            g_loss.backward()
+            g_optimizer.step()
+
+            if epoch % 100 == 0:
+                print(f"Epoch [{epoch}/{epochs}], d_loss: {d_loss.item()}, g_loss: {g_loss.item()}")
+
+# Example data (You need to replace this with your actual data)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+G.to(device)
+D.to(device)
+text_descriptions = ["example text description"]
+image_data = torch.randn(1, 3, 256, 256).to(device) # Replace with actual image tensors
+
+# Train the model
+train(text_descriptions, image_data)
