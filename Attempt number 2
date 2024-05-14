@@ -1,0 +1,105 @@
+aws89
+7:39 AM (0 minutes ago)
+to Awsheehy89
+
+import openai
+import requests
+from PIL import Image
+from io import BytesIO
+import os
+import datetime
+
+# Set your OpenAI API key
+openai.api_key = 'YOUR_OPENAI_API_KEY'
+
+def generate_image(prompt):
+    """
+    Generate an image from a text prompt using OpenAI's DALL-E 2 API.
+
+    Args:
+    prompt (str): The text description for image generation.
+
+    Returns:
+    str: URL of the generated image.
+    """
+    try:
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="256x256"
+        )
+        image_url = response['data'][0]['url']
+        return image_url
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+def save_image(image_url, filename):
+    """
+    Save an image from a URL to a local file.
+
+    Args:
+    image_url (str): The URL of the image to save.
+    filename (str): The filename to save the image as.
+    """
+    try:              
+        response = requests.get(image_url)
+        img = Image.open(BytesIO(response.content))
+        img.save(filename)
+        print(f"Image saved as {filename}")
+    except Exception as e:
+        print(f"An error occurred while saving the image: {e}")
+
+def preprocess_prompt(prompt):
+    """
+    Preprocess the text prompt.
+
+    Args:
+    prompt (str): The original text prompt.
+
+    Returns:
+    str: The preprocessed text prompt.
+    """
+    # For this example, preprocessing can be minimal (e.g., stripping leading/trailing spaces)
+    return prompt.strip()
+
+def postprocess_image(image_path):
+    """
+    Postprocess the saved image (e.g., resizing, applying filters).
+
+    Args:
+    image_path (str): Path to the image to postprocess.
+    """
+    try:
+        with Image.open(image_path) as img:
+            # Example postprocessing: converting to grayscale
+            img = img.convert("L")
+            img.save(image_path)
+            print(f"Postprocessed image saved as {image_path}")
+    except Exception as e:
+        print(f"An error occurred during postprocessing: {e}")
+
+def main():
+    # Get user input for the prompt
+    prompt = input("Enter a text description for the image: ")
+    
+    # Preprocess the prompt
+    processed_prompt = preprocess_prompt(prompt)
+
+    # Generate the image
+    image_url = generate_image(processed_prompt)
+    if image_url:
+        # Create a dynamic filename with a timestamp
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"generated_image_{timestamp}.png"
+        
+        # Save the image
+        save_image(image_url, filename)
+        
+        # Postprocess the image
+        postprocess_image(filename)
+    else:
+        print("Failed to generate image.")
+
+if __name__ == "__main__":
+    main()
