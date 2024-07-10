@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+        #image {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text-to-Image Generator</h1>
+    <textarea id="textInput" placeholder="Enter text here..."></textarea><br>
+    <button onclick="generateImage()">Generate Image</button>
+    <div id="image"></div>
+
+    <script>
+        function generateImage() {
+            const text = document.getElementById('textInput').value;
+            fetch('/generate-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const imageDiv = document.getElementById('image');
+                imageDiv.innerHTML = `<img src="data:image/png;base64,${data.image}" alt="Generated Image"/>`;
+            });
+        }
+    </script>
+</body>
+</html>
+
+from flask import Flask, request, jsonify
+from PIL import Image
+import io
+import base64
+
+app = Flask(__name__)
+
+# Dummy text-to-image generation function
+def text_to_image(text):
+    # Replace this with the actual AI model call
+    img = Image.new('RGB', (200, 100), color = (73, 109, 137))
+    return img
+
+@app.route('/generate-image', methods=['POST'])
+def generate_image():
+    data = request.json
+    text = data.get('text')
+    
+    # Generate the image using the AI model
+    img = text_to_image(text)
+    
+    # Convert the image to base64
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    
+    return jsonify({'image': img_str})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+pip install flask pillow
+
+python app.py
+
