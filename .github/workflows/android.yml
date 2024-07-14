@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:echo "# Asheehy89" >> README.md 
-git add README.android.yaml
+git add README.yaml
 git commit -M "first committ"
 git branch -M main
 git remote add origin https://github.com/Asheehy89/Asheehy89.git
