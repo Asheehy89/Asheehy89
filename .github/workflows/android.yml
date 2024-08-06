@@ -72,8 +72,7 @@ jobs:
     cache: # optional
     # Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.
     cache-dependency-path: # optional
-	            
-                      - name: Upload a Build Artifact
+	             - name: Upload a Build Artifact
   uses: actions/upload-artifact@v4.3.5
   with:
     # Artifact name
