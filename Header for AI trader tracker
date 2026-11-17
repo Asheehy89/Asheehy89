@@ -63,3 +63,8 @@ Introduction
      11.4.  Message Confidentiality
    12. IANA Considerations
     
+SecurityTXT](src/cloudflare/resources/security_txt/api.md)DCVDelegation](src/cloudflare/resources/dcv_delegation/api.md)
+ <code title="post /accounts/{account_id}/analytics/query/data-security/findings/summary">client.analytics_query.data_security.findings.<a href="./src/cloudflare/resources/analytics_query/data_security/findings.py">summary</a>(\*, account_id, \*\*<a href="src/cloudflare/types/analytics_query/data_security/finding_summary_params.py">params</a>) -> <a href="./src/cloudflare/types/analytics_query/data_security/finding_summary_response.py">FindingSummaryResponse</a></code>
+- <code<code title="post /accounts/{account_id}/analytics/query/{dataset}/top-n">client.analytics_query.<a href="./src/cloudflare/resources/analytics_query/analytics_query.py">top_n</a>(dataset, \*, account_id, \*\*<a href="src/cloudflare/types/analytics_query_top_n_params.py">params</a>) -> <a href="./src/cloudflare/types/analytics_query_top_n_response.py">SyncSinglePage[AnalyticsQueryTopNResponse]</a></code>
+
+## DataSecurity
