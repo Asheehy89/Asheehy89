@@ -96,3 +96,40 @@ image_data = torch.randn(1, 3, 256, 256).to(device) # Replace with actual image 
 
 # Train the model
 train(text_descriptions, image_data)
+import fs from 'fs';
+import Cloudflare, { toFile } from 'cloudflare';
+
+const client = new Cloudflare();
+
+// If you have access to Node `fs` we recommend using `fs.createReadStream()`:
+await client.kv.namespaces.values.update('My-Key', {
+  account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+  namespace_id: '0f2ac74b498b48028cb68387c421e279',
+  value: fs.createReadStream('/path/to/file'),
+});
+
+// Or if you have the web `File` API you can pass a `File` instance:
+await client.kv.namespaces.values.update('My-Key', {
+  account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+  namespace_id: '0f2ac74b498b48028cb68387c421e279',
+  value: new File(['my bytes'], 'file'),
+});
+
+// You can also pass a `fetch` `Response`:
+await client.kv.namespaces.values.update('My-Key', {
+  account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+  namespace_id: '0f2ac74b498b48028cb68387c421e279',
+  value: await fetch('https://somesite/file'),
+});
+
+// Finally, if none of the above are convenient, you can use our `toFile` helper:
+await client.kv.namespaces.values.update('My-Key', {
+  account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+  namespace_id: '0f2ac74b498b48028cb68387c421e279',
+  value: await toFile(Buffer.from('my bytes'), 'file'),
+});
+await client.kv.namespaces.values.update('My-Key', {
+  account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+  namespace_id: '0f2ac74b498b48028cb68387c421e279',
+  value: await toFile(new Uint8Array([0, 1, 2]), 'file'),
+});
